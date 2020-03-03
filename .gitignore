@@ -1,0 +1,5 @@
+log.csv
+analytics_outputs/
+__pycache__
+status
+.DS_Store

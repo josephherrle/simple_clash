@@ -22,7 +22,6 @@ class Event:
 	fields.append('snk_cur_amt')
 
 	def __init__(self,payload):
-		# print("Event in init()")
 		
 		line = dict.fromkeys(Event.fields)	
 		line.update(payload)
@@ -39,13 +38,11 @@ class Event:
 		self.write(line.values())
 
 	def write(self,line):
-		print("Event in write()")
-		with open(Event.log_path,'a',newline='') as log:					
+		with open(Event.log_path,'a',newline='') as log:
 			log_writer=csv.writer(log)
 			log_writer.writerow(line)
 
 def main():
-	print("In events.py main()")
 	if os.path.exists(Event.log_path):
 		os.remove(Event.log_path)
 	self.write(Event.fields)

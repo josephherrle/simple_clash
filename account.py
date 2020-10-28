@@ -7,12 +7,12 @@ class Account:
     
     _instances = dict()
 
-    def __init__(self):
+    def __init__(self,params):
         self.username = 'UserName'
         self.user_id = len(self._instances)
         
         # TODO abstract these to config
-        self.gold = 100
+        self.gold = params['starting_gold']
         self.gold_vault_amnt_max = 10000 # max gold that can be held in the vault
         self.gold_mine_amnt = 0 # current amount held by the gold mine
         self.gold_mine_amnt_max = 200 # max amount held by the gold mine
@@ -30,6 +30,6 @@ class Account:
         except:
             cur_time = datetime.strptime(cur_time,"%Y-%m-%d %H:%M:%S")
         time_delta_sec = (cur_time - self.last_active_time).total_seconds()
-        print(f"Updating account with user id {self.user_id} due to time delta:"+str(time_delta_sec))
+        # print(f"Updating account with user id {self.user_id} due to time delta:"+str(time_delta_sec))
         self.gold_mine_amnt += min(time_delta_sec * self.gold_mine_prod, self.gold_mine_amnt_max - self.gold_mine_amnt)
         self.last_active_time = cur_time

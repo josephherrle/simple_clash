@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import thriftpy2
+import pandas as pd
 
 from account import Account
 from datetime import datetime
@@ -12,13 +13,24 @@ sc_thrift = thriftpy2.load("simple_clash.thrift", module_name="sc_thrift")
 # profiles = sc_thrift.Profile
 
 class Dispatcher(object):
+    
+    def __init__(self):
+        print("Getting config")
+        self.config = {}
+        df_account = pd.read_excel('config/excel/account.xlsx',sheet_name='account')
+        df_account = df_account.set_index(['account_profile','attr_name'])
+        self.config['account'] = df_account
+
     def ping(self):
         print("Got ping")
         return ('The server was pinged')
 
-    def create_account(self):
-        print("Got request to create an account")
-        account = Account()
+    def create_account(self,account_profile):
+        print(f"Got request to create an account with profile {account_profile}")
+        params = {}
+        account_config = self.config['account'].loc[account_profile]
+        params['starting_gold'] = account_config.loc['starting_gold']['value_int']
+        account = Account(params)
         print("Created account with user ID " + str(account.user_id))
         return account.user_id
 
@@ -27,7 +39,7 @@ class Dispatcher(object):
 
     # find and serialize a specified account for Thrift
     def get_account(self, user_id, client_time):
-        print(f"Got request for account for user {user_id}")
+        # print(f"Got request for account for user {user_id}")
         account_py = self.get_account_local(user_id)
         # if any time has passed, also update the account
         if not client_time is None:
@@ -73,7 +85,7 @@ class Dispatcher(object):
 
     def send_event(self,payload):
         payload['evt_src']='server'
-        print("In Server.send_event()")
+        # print("In Server.send_event()")
         # in reality, the server would send its own time
         # here, the client passes its current time for the server to print to events
         if 'sts' not in payload:

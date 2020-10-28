@@ -16,7 +16,7 @@ from event import Event
 
 sc_thrift = thriftpy2.load("simple_clash.thrift", module_name="sc_thrift")
 
-class App:
+class Client:
 
     def __init__(self,context):
         self.running = True
@@ -32,8 +32,7 @@ class App:
 
     # Asks the server to create an account
     def create_account(self):
-        user_id = self.context.create_account()
-        print("Server created account for me with id "+str(user_id))
+        user_id = self.context.create_account('_default')
         return user_id
 
     # Get account state from the server
@@ -42,8 +41,7 @@ class App:
         return account
 
     def play(self):
-        print("Starting gameplay iteration")
-
+        self.log("Starting gameplay iteration")
         i=0
         i_lim=self.session_limit
         while i<i_lim and self.rolling_retention > random.uniform(0,1):
@@ -53,8 +51,8 @@ class App:
             i+=1
 
     def play_session(self): 
-        
-        print(f"Starting session {self.session_count}. Current time: {self.cur_time}")
+        message = "Starting session {self.session_count}. Current time: {self.cur_time}"
+        self.log(message)
 
         i=0 # iterations - each iteration, the user chooses a thing to do, then time adanvces by tick length
         i_lim=self.session_iteration_limit # don't do more than this many iterations
@@ -86,18 +84,15 @@ class App:
                 wght_log_off = boredom
             choices['log_off'] = wght_log_off
             
-            # print(f'Choices: {choices}')
             choice = random.choices(list(choices.keys()),list(choices.values()))[0]
             str_iter += f'. Choosing to: {choice}'
-            # print(str_iter)
+            # self.log(str_iter      )
 
             if choice == 'collect_gold_mine':
                 self.collect_gold_mine()
             elif choice == 'do_nothing':
                 boredom+=tick_length_secs
-                # print("Getting bored. Boredom: "+str(boredom))
             elif choice == 'log_off':
-                # print(f'Logging off due to boredom. Current time: {self.cur_time}')
                 return
 
             # Close iteration, advance time
@@ -114,6 +109,9 @@ class App:
     def dump_acct(self):
         print(self.get_account())
 
+    def log(self,message):
+        print(f"User {self.user_id}: {message}")
+
     def send_event(self,payload):
         payload['evt_src']='client'
         payload['cts']=self.cur_time
@@ -124,7 +122,7 @@ def main():
     with client_context(sc_thrift.SCService, '127.0.0.1', 6000,
         proto_factory=TCyBinaryProtocolFactory(),
         trans_factory=TCyBufferedTransportFactory()) as context:
-        client = App(context)
+        client = Client(context)
         client.play()
         # client.dump_acct()
 

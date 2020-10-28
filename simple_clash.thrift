@@ -1,7 +1,9 @@
 namespace py sc_thrift
 
 service SCService {
-    i32 create_account(),
+    i32 create_account(
+        1:string account_profile
+        ),
     Account get_account(
         1:i32 user_id,
         2:string client_time

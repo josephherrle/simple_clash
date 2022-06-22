@@ -1,5 +1,5 @@
 croniter==0.3.30
-numpy==1.18.1
+numpy==1.22.0
 pandas==1.0.1
 ply==3.11
 pygame==1.9.6
